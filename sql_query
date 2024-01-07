@@ -1,0 +1,32 @@
+WITH LastPurchaseDate AS (
+    SELECT
+        CustomerID,
+        MAX(Transaction_Date) AS Last_Transaction_Date
+    FROM
+        bionic-comfort-410416.online_sales.combine_data`
+    GROUP BY
+        CustomerID
+)
+
+, churn AS (
+SELECT
+    t.CustomerID,
+    t.Transaction_Date,
+    CASE
+        WHEN lpd.Last_Transaction_Date IS NULL THEN 1  
+        WHEN lpd.Last_Transaction_Date + 30 < cast('2020-01-01' as date) THEN 1 
+        ELSE 0  -- Active
+    END AS Churn
+FROM
+    bionic-comfort-410416.online_sales.combine_data` t
+LEFT JOIN
+    LastPurchaseDate lpd ON t.CustomerID = lpd.CustomerID
+)
+
+, combine AS (
+  
+)
+
+
+SELECT t.CustomerID, t.Transaction_ID, t.Transaction_Date, Product_SKU, Product_Description, Product_Category, Quantity, Avg_Price, Delivery_Charges, Coupon_Status, Gender, Location, Tenure_Months, Total_Spent, churn.Churn FROM bionic-comfort-410416.online_sales.combine_data` t
+LEFT JOIN churn ON t.CustomerID = churn.CustomerID AND t.Transaction_Date = churn.Transaction_Date
